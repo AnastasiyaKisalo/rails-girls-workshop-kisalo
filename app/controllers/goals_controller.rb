@@ -24,12 +24,43 @@ class GoalsController < ApplicationController
 	end
 
 	def filtered_goals
-	  if params[:filter] == 'completed'
-	    Goal.completed
-	  elsif params[:filter] == 'incomplete'
-	    Goal.incomplete
+		if params[:filter] == 'completed'
+		  Goal.completed
+		elsif params[:filter] == 'incomplete'
+		  Goal.incomplete
+		else
+		  Goal.all
+		end
+	end
+
+	def show
+	  @goal = Goal.find_by(id: params[:id])
+	end
+
+	def edit
+	  @goal = Goal.find_by(id: params[:id])
+	end
+
+	def update
+	  @goal = Goal.find_by(id: params[:id])
+	  if @goal.update_attributes(goal_params)
+	    flash[:success] = 'Your goal has been successfully updated'
+	    if @goal.complete?
+	      redirect_to goals_path(filter: 'completed')
+	    else
+	      redirect_to goals_path
+	    end
 	  else
-	    Goal.all
+	    flash.now[:error] = 'Please fill in all necessary fields.'
+	    render 'edit'
 	  end
 	end
+
+	def destroy
+	  @goal = Goal.find_by(id: params[:id])
+	  @goal.destroy
+	  flash[:info] = 'Your goal has been successfully deleted'
+	  redirect_to goals_path
+	end
+
 end
